@@ -7,19 +7,24 @@ servers:
 paths:
   /rest/api/v1/pets:
     get:
-      summary: get all pets
+      summary: get all
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetFindAllRq'
       responses:
-        "200":
+        200:
           description: Success response
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Pet'
+                $ref: '#/components/schemas/PetFindAllPaginRs'
+
   /rest/api/v1/pets/{id}:
     get:
-      summary: get pet by id
+      summary: get by id
       parameters:
         - name: id
           in: path
@@ -34,12 +39,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: '#/components/schemas/PetRs'
         "404":
           description: Не успешный ответ, питомец не найден
 components:
   schemas:
-    Pet:
+    PetRs:
       type: object
       required:
         - id
@@ -61,5 +66,89 @@ components:
         createdAt:
           type: string
           format: datetime
-          example: "2021-01-30T08:30:00Z"
+          example: "2025-12-05T20:26:10.9680942"
           description: Время создания
+
+    PetFindAllRq:
+      type: object
+      properties:
+        pageRq:
+          $ref: '#/components/schemas/PageRq'
+        filter:
+          type: array
+          items:
+            $ref: '#/components/schemas/PetFilterRq'
+
+          description: Фильтрация
+      description: Данные о пагинации
+
+    PetFilterRq:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: Ключ фильтра
+          example: PET_NAME
+        value:
+          type: string
+          example: Tom
+          description: Значение фильтра
+
+    PetFindAllPaginRs:
+      allOf:
+        - $ref: '#/components/schemas/PageRs'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/PetRs'
+              description: Данные о питомцах
+      description: Спагинированные питомцы
+
+    PageRq:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+          minimum: 0
+          description: Номер страницы
+        pageSize:
+          type: integer
+          minimum: 1
+          description: Размер данных на странице
+      description: Данные о пагинации
+
+    PageRs:
+      type: object
+      required:
+        - content
+        - pageNumber
+        - pageSize
+        - totalCount
+        - hasNext
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+          description: Данные
+        pageNumber:
+          type: integer
+          description: Номер страницы
+        pageSize:
+          type: integer
+          example: 12
+          description: Размер данных на странице
+        totalCount:
+          type: integer
+          example: 175
+          description: Общее кол-во данных
+        hasNext:
+          type: boolean
+          example: true
+          description: Последняя-ли страница
+      description: Данные с пагинацией

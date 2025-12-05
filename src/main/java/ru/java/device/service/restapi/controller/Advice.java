@@ -1,12 +1,9 @@
 package ru.java.device.service.restapi.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.Getter;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -16,41 +13,72 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @ControllerAdvice
-@RequiredArgsConstructor
 public class Advice {
-    private final ObjectMapper mapper;
 
     @ExceptionHandler
     public ResponseEntity<ErrorDto> handler(PetNotFoundException ex) {
         ErrorDto rs = ErrorDto.builder()
                 .errorId(UUID.randomUUID())
-                .createdAt(LocalDateTime.now())
-                .message("Pet by %s not found".formatted(ex.getPetId()))
+                .timestamp(LocalDateTime.now())
+                .message("Pet not found by %s".formatted(ex.getPetId()))
                 .build();
 
         return new ResponseEntity<>(rs, ex.getStatus());
     }
 
     @ExceptionHandler
-    public ResponseEntity<Object> handler(MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<ErrorDto> handler(MethodArgumentTypeMismatchException ex) {
         ErrorDto errorDto = ErrorDto.builder()
                 .errorId(UUID.randomUUID())
-                .createdAt(LocalDateTime.now())
+                .timestamp(LocalDateTime.now())
                 .message(ex.getMessage())
-                .codeStatus(HttpStatus.BAD_REQUEST.value())
                 .build();
-
-
 
         return ResponseEntity.badRequest().body(errorDto);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<ErrorFieldValidationDto> handler(MethodArgumentNotValidException ex) {
+
+        List<ErrorFieldMessage> fieldsInfoError = ex.getBindingResult()
+                .getFieldErrors().stream()
+                .map(error -> ErrorFieldMessage.builder()
+                        .fieldname(error.getField())
+                        .errorMessage(error.getDefaultMessage())
+                        .build()
+                ).toList();
+
+        ErrorFieldValidationDto rs = ErrorFieldValidationDto.builder()
+                .errorDto(ErrorDto.builder()
+                        .errorId(UUID.randomUUID())
+                        .timestamp(LocalDateTime.now())
+                        .message("fail validation request data")
+                        .build())
+                .errorFieldMessages(fieldsInfoError)
+                .build();
+
+        return ResponseEntity.badRequest().body(rs);
+    }
+
     @Builder
-    @Data
+    @Getter
     public static class ErrorDto {
         private final UUID errorId;
-        private final LocalDateTime createdAt;
+        private final LocalDateTime timestamp;
         private final String message;
-        private final Integer codeStatus;
+    }
+
+    @Builder
+    @Getter
+    public static class ErrorFieldValidationDto {
+        private ErrorDto errorDto;
+        List<ErrorFieldMessage> errorFieldMessages;
+    }
+
+    @Builder
+    @Getter
+    public static class ErrorFieldMessage {
+        private String fieldname;
+        private String errorMessage;
     }
 }

@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: pet-api
+  datasource:
+    password: postgres
+    username: postgres
+    name: postgres
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+
+  flyway:
+    password: postgres
+    user: postgres
+  jpa:
+    show-sql: true
