@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: Code Basics
+  version: 1.0.0
+servers:
+  - url: https://code-basics.com
+paths:
+  /rest/api/v1/pets:
+    get:
+      summary: get all pets
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+  /rest/api/v1/pets/{id}:
+    get:
+      summary: get pet by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор питомца
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        "404":
+          description: Не успешный ответ, питомец не найден
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - id
+        - name
+        - age
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор
+        name:
+          type: string
+          description: Имя питомца
+          example: Tom
+        age:
+          type: integer
+          description: Возраст питомца
+        createdAt:
+          type: string
+          format: datetime
+          example: "2021-01-30T08:30:00Z"
+          description: Время создания
