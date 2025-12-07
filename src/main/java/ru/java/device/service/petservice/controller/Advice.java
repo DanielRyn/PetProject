@@ -1,4 +1,4 @@
-package ru.java.device.service.restapi.controller;
+package ru.java.device.service.petservice.controller;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -7,7 +7,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ru.java.device.service.restapi.Exception.PetNotFoundException;
+import ru.java.device.service.petservice.exception.OperationByIdempotemtKeyWasSuccessException;
+import ru.java.device.service.petservice.exception.PetNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -26,7 +27,10 @@ public class Advice {
         return new ResponseEntity<>(rs, ex.getStatus());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(exception = {
+            MethodArgumentTypeMismatchException.class,
+            OperationByIdempotemtKeyWasSuccessException.class
+    })
     public ResponseEntity<ErrorDto> handler(MethodArgumentTypeMismatchException ex) {
         ErrorDto errorDto = ErrorDto.builder()
                 .errorId(UUID.randomUUID())

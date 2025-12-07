@@ -3,7 +3,7 @@ info:
   title: Code Basics
   version: 1.0.0
 servers:
-  - url: https://code-basics.com
+  - url: http://localhost:8080
 paths:
   /rest/api/v1/pets:
     get:
@@ -26,6 +26,13 @@ paths:
     get:
       summary: get by id
       parameters:
+        - name: idempotentKey
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Ключ идемпотентности
         - name: id
           in: path
           required: true
@@ -67,7 +74,7 @@ components:
           type: string
           format: datetime
           example: "2025-12-05T20:26:10.9680942"
-          description: Время создания
+          description: Время создания питомца
 
     PetFindAllRq:
       type: object

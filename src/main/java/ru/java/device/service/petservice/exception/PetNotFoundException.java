@@ -1,4 +1,4 @@
-package ru.java.device.service.restapi.Exception;
+package ru.java.device.service.petservice.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

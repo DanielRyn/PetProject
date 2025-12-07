@@ -13,3 +13,9 @@ spring:
     user: postgres
   jpa:
     show-sql: true
+  data:
+    redis:
+      username: redis
+      password: redis
+      host: localhost
+      port: 6379

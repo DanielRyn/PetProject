@@ -1,4 +1,4 @@
-package ru.java.device.service.restapi;
+package ru.java.device.service.petservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,5 +9,4 @@ class RestApiApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }

@@ -1,33 +1,28 @@
-package ru.java.device.service.restapi.entity;
+package ru.java.device.service.petservice.entity.cashe;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.redis.core.RedisHash;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
-@Table(name = "pet")
-@Entity
+@RedisHash("idempotent")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Pet {
+public class IdempotentCashe {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "age")
-    private int age;
-
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
