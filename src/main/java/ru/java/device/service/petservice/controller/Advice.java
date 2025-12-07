@@ -31,7 +31,7 @@ public class Advice {
             MethodArgumentTypeMismatchException.class,
             OperationByIdempotemtKeyWasSuccessException.class
     })
-    public ResponseEntity<ErrorDto> handler(MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<ErrorDto> handler(Exception ex) {
         ErrorDto errorDto = ErrorDto.builder()
                 .errorId(UUID.randomUUID())
                 .timestamp(LocalDateTime.now())

@@ -2,20 +2,20 @@ spring:
   application:
     name: pet-api
   datasource:
-    password: postgres
-    username: postgres
-    name: postgres
+    password: ${POSTGRES_PASSWORD:postgres}
+    username: ${POSTGRES_USERNAME:postgres}
+    name: ${POSTGRES_NAME:postgres}
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:postgres}
 
   flyway:
-    password: postgres
-    user: postgres
+    password: ${POSTGRES_PASSWORD:postgres}
+    user: ${POSTGRES_USERNAME:postgres}
   jpa:
     show-sql: true
   data:
     redis:
-      username: redis
-      password: redis
-      host: localhost
-      port: 6379
+      username: ${REDIS_USERNAME:redis}
+      password: ${REDIS_PASSWORD:redis}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}

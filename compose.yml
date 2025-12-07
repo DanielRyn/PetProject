@@ -1,6 +1,19 @@
 version: '3.9'
 
 services:
+  pet-service:
+    container_name: pet-service
+    build: .
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+    ports:
+      - "8080:8080"
   postgres:
     image: postgres:latest
     container_name: postgres
