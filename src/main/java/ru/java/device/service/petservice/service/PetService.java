@@ -34,12 +34,6 @@ public class PetService {
         Page<PetRs> paginRs = repository.findAll(pageRequest)
                 .map(petConverter::map);
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
         log.info("foundAll pets {}", paginRs
                 .map(o -> o.getId().toString()).stream()
                 .collect(Collectors.joining(", "))
