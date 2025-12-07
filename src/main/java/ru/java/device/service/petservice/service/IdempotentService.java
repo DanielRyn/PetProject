@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.java.device.service.petservice.entity.cashe.IdempotentCashe;
-import ru.java.device.service.petservice.repository.cashe.idempotentRepository;
+import ru.java.device.service.petservice.repository.idempotentRepository;
 
 import java.util.UUID;
 

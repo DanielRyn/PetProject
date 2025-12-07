@@ -1,4 +1,4 @@
-package ru.java.device.service.petservice.repository.cashe;
+package ru.java.device.service.petservice.repository.pet.cashe;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

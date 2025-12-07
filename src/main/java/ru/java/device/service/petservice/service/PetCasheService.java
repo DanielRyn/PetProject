@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.java.device.service.petservice.converter.PetConverter;
 import ru.java.device.service.petservice.entity.Pet;
 import ru.java.device.service.petservice.entity.cashe.PetCashe;
-import ru.java.device.service.petservice.repository.cashe.PetCasheRepository;
+import ru.java.device.service.petservice.repository.pet.cashe.PetCasheRepository;
 
 import java.util.Optional;
 import java.util.UUID;

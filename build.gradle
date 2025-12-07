@@ -40,6 +40,7 @@ dependencies {
     implementation("org.openapitools:jackson-databind-nullable:0.2.3")
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
@@ -57,10 +58,24 @@ dependencyManagement {
     }
 }
 
+task generateOpenApiAndBuild {
+    group = 'build'
+
+    tasks.named('compileJava') {
+        dependsOn 'openApiGenerate'
+    }
+
+    tasks.named('build') {
+        dependsOn 'openApiGenerate'
+    }
+
+    dependsOn 'build'
+}
+
 openApiGenerate {
     generatorName.set('spring')
 
-    inputSpec.set("$projectDir/src/main/resources/openapi.yml")
+    inputSpec.set("$projectDir/src/main/resources/static/openapi.yml")
     outputDir.set("$projectDir/generated")
 
     invokerPackage.set('invoker')

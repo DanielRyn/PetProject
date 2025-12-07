@@ -2,7 +2,6 @@ package ru.java.device.service.petservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,10 +13,16 @@ import java.util.UUID;
 @Table(name = "pet")
 @Entity
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Pet {
+
+    public Pet(String name, int age) {
+        this.name = name;
+        this.age = age;
+        this.createdAt = LocalDateTime.now();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

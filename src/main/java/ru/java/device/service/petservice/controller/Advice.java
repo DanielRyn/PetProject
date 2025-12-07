@@ -6,8 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ru.java.device.service.petservice.exception.OperationByIdempotemtKeyWasSuccessException;
+import ru.java.device.service.petservice.exception.badRequest.ApplicationBadRequestException;
 import ru.java.device.service.petservice.exception.PetNotFoundException;
 
 import java.time.LocalDateTime;
@@ -27,11 +26,8 @@ public class Advice {
         return new ResponseEntity<>(rs, ex.getStatus());
     }
 
-    @ExceptionHandler(exception = {
-            MethodArgumentTypeMismatchException.class,
-            OperationByIdempotemtKeyWasSuccessException.class
-    })
-    public ResponseEntity<ErrorDto> handler(MethodArgumentTypeMismatchException ex) {
+    @ExceptionHandler(exception = {ApplicationBadRequestException.class})
+    public ResponseEntity<ErrorDto> badRequestHandler(Exception ex) {
         ErrorDto errorDto = ErrorDto.builder()
                 .errorId(UUID.randomUUID())
                 .timestamp(LocalDateTime.now())
