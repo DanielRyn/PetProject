@@ -56,7 +56,7 @@ public class PetService {
                 paginRs.getNumber(),
                 paginRs.getSize(),
                 (int) paginRs.getTotalElements(),
-                paginRs.getTotalPages() - 1,
+                paginRs.getTotalPages(),
                 paginRs.hasNext()
         );
     }
