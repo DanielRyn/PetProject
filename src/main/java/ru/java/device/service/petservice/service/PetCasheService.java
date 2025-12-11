@@ -33,4 +33,11 @@ public class PetCasheService {
         repository.save(converter.mapToCashe(value));
         log.info("saved in cashe by key {}", value.getId());
     }
+
+    public void delete(@NonNull UUID petId) {
+        if (repository.existsById(petId)) {
+            repository.deleteById(petId);
+            log.info("deleted from cashe by key {}", petId);
+        }
+    }
 }

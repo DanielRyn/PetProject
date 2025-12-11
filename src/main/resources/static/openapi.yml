@@ -97,6 +97,52 @@ paths:
                       message:
                         example: Pet not found by 25211cdd-7d18-4ae6-b693-d2e805246217
 
+  /rest/api/v1/pets/delete/{id}:
+    description: delete
+    delete:
+      summary: Удаление питомца по Id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор питомца
+          example: 25211cdd-7d18-4ae6-b693-d2e805246217
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Успешно удалено
+        "404":
+          description: Не успешный ответ, питомец не найден
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorDto'
+                  - type: object
+                    properties:
+                      message:
+                        example: Pet not found by 25211cdd-7d18-4ae6-b693-d2e805246217
+
+  /rest/api/v1/pets/delete:
+    description: delete
+    delete:
+      summary: Удаление питомцев по Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetsDeleteRq'
+      responses:
+        "207":
+          description: Удаление
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetsDeleteRs'
+
 components:
   schemas:
     PetRq:
@@ -143,6 +189,49 @@ components:
           format: datetime
           description: Время создания питомца
           example: "2025-12-05T20:26:10.9680942"
+
+    PetsDeleteRq:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    PetsDeleteRs:
+      type: object
+      required:
+        - successDeleted
+        - failDeleted
+      properties:
+        successDeleted:
+          type: array
+          items:
+            type: string
+            format: uuid
+            description: Уникальный идентификатор питомца
+        failDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/PetsNotDeleted'
+
+    PetsNotDeleted:
+      type: object
+      required:
+        - petId
+        - failMessage
+      properties:
+        petId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор питомца
+        failMessage:
+          type: string
+          example: "Pet not found by 3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          description: Сообщение об ошибке
 
     PetFindAllRq:
       type: object
@@ -193,7 +282,7 @@ components:
         pageSize:
           type: integer
           minimum: 1
-          maximum: 10
+          maximum: 100
           description: Размер данных на странице
       description: Данные о пагинации
 

@@ -3,6 +3,13 @@ package ru.java.device.service.petservice.service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.PetsDeleteRs;
+import model.PetFindAllPaginRs;
+import model.PetFindAllRq;
+import model.PetRq;
+import model.PetRs;
+import model.PetsNotDeleted;
+import model.PetsDeleteRq;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -11,15 +18,9 @@ import ru.java.device.service.petservice.exception.PetNotFoundException;
 import ru.java.device.service.petservice.converter.PetConverter;
 import ru.java.device.service.petservice.entity.Pet;
 import ru.java.device.service.petservice.repository.pet.PetRepository;
-
-import model.PetFindAllPaginRs;
-import model.PetFindAllRq;
-import model.PetRs;
-import model.PetRq;
 import ru.java.device.service.petservice.repository.pet.specitifation.PetSpecification;
 
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,7 @@ public class PetService {
     private final PetConverter petConverter;
     private final PetCasheService petCasheService;
     private final IdempotentService idempotentService;
+    private final PetRepository petRepository;
 
     public PetRs create(@NonNull PetRq rq, @NonNull UUID idempotentKey) {
         if (idempotentService.isExist(idempotentKey)) {
@@ -40,6 +42,40 @@ public class PetService {
 
         idempotentService.add(idempotentKey);
         return petConverter.map(saved);
+    }
+
+    public void delete(@NonNull UUID petId) {
+        if (!petRepository.existsById(petId)) {
+            log.info("pet not found by {}", petId);
+            throw new PetNotFoundException(petId);
+        }
+
+        repository.deleteById(petId);
+        petCasheService.delete(petId);
+        log.info("pet by {} success deleted", petId);
+    }
+
+    public PetsDeleteRs delete(@NonNull PetsDeleteRq rq) {
+        List<UUID> successDeleted = new ArrayList<>();
+        List<PetsNotDeleted> failedDeleted = new ArrayList<>();
+
+        List<UUID> distinctPetIds = rq.getId().stream().distinct().toList();
+        for (UUID petId : distinctPetIds) {
+            try {
+                delete(petId);
+                successDeleted.add(petId);
+            } catch (PetNotFoundException e) {
+                failedDeleted.add(new PetsNotDeleted(
+                        e.getPetId(),
+                        e.getMessage()
+                ));
+            }
+        }
+
+        return new PetsDeleteRs(
+                successDeleted,
+                failedDeleted
+        );
     }
 
     public PetFindAllPaginRs findAll(PetFindAllRq rq) {
@@ -56,7 +92,7 @@ public class PetService {
                 paginRs.getNumber(),
                 paginRs.getSize(),
                 (int) paginRs.getTotalElements(),
-                paginRs.getTotalPages(),
+                paginRs.getTotalPages() - 1,
                 paginRs.hasNext()
         );
     }

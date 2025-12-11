@@ -3,9 +3,11 @@ package ru.java.device.service.petservice.controller;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.java.device.service.petservice.exception.badRequest.ApplicationBadRequestException;
 import ru.java.device.service.petservice.exception.PetNotFoundException;
 
@@ -16,17 +18,22 @@ import java.util.*;
 public class Advice {
 
     @ExceptionHandler
+    //TODO лучше сделать ApplicationException и наследоваться от него, ловить его ошибки
     public ResponseEntity<ErrorDto> handler(PetNotFoundException ex) {
         ErrorDto rs = ErrorDto.builder()
                 .errorId(UUID.randomUUID())
                 .timestamp(LocalDateTime.now())
-                .message("Pet not found by %s".formatted(ex.getPetId()))
+                .message(ex.getMessage())
                 .build();
 
         return new ResponseEntity<>(rs, ex.getStatus());
     }
 
-    @ExceptionHandler(exception = {ApplicationBadRequestException.class})
+    @ExceptionHandler(exception = {
+            ApplicationBadRequestException.class,
+            MethodArgumentTypeMismatchException.class,
+            HttpMessageNotReadableException.class
+    })
     public ResponseEntity<ErrorDto> badRequestHandler(Exception ex) {
         ErrorDto errorDto = ErrorDto.builder()
                 .errorId(UUID.randomUUID())
@@ -39,7 +46,6 @@ public class Advice {
 
     @ExceptionHandler
     public ResponseEntity<ErrorFieldValidationDto> handler(MethodArgumentNotValidException ex) {
-
         List<ErrorFieldMessage> fieldsInfoError = ex.getBindingResult()
                 .getFieldErrors().stream()
                 .map(error -> ErrorFieldMessage.builder()

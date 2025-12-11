@@ -5,10 +5,13 @@ import lombok.RequiredArgsConstructor;
 import model.PetFindAllPaginRs;
 import model.PetFindAllRq;
 import model.PetRq;
+import model.PetRs;
+import model.PetsDeleteRs;
+import model.PetsDeleteRq;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.java.device.service.petservice.service.PetService;
-import model.PetRs;
 
 import java.net.URI;
 import java.util.UUID;
@@ -24,6 +27,19 @@ public class PetController implements RestApi {
         return ResponseEntity.created(
                 URI.create(String.format("/rest/api/v1/pets/%s", rs.getId()))
         ).body(rs);
+    }
+
+    @Override
+    public ResponseEntity<PetsDeleteRs> restApiV1PetsDeleteDelete(PetsDeleteRq petsDeleteRq) {
+        return ResponseEntity
+                .status(HttpStatus.MULTI_STATUS)
+                .body(petService.delete(petsDeleteRq));
+    }
+
+    @Override
+    public ResponseEntity<Void> restApiV1PetsDeleteIdDelete(UUID id) {
+        petService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Override
