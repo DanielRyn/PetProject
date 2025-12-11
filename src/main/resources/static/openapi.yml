@@ -1,0 +1,374 @@
+openapi: 3.0.0
+info:
+  title: Pet Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /rest/api/v1/pet:
+    post:
+      summary: Создание питомца
+      parameters:
+        - name: idempotentKey
+          in: header
+          required: true
+          example: 983f8edc-4f89-45bd-98e4-1023d13b042f
+          schema:
+            type: string
+            format: uuid
+            description: Ключ идемпотентности
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetRq'
+      responses:
+        201:
+          description: Успешный ответ на создание
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetRs'
+        400:
+          description: Операция по тому же Idempotemt Key
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorDto'
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Operation by idempotemtKey {983f8edc-4f89-45bd-98e4-1023d13b042f} was process
+
+  /rest/api/v1/pets:
+    post:
+      summary: Получение всех питомцев
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetFindAllRq'
+      responses:
+        200:
+          description: Успешное получение всех питомцев
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetFindAllPaginRs'
+        400:
+          description: Введены некорректные параметры в запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /rest/api/v1/pets/{id}:
+    get:
+      summary: Получение питомца по Id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор питомца
+          example: 25211cdd-7d18-4ae6-b693-d2e805246217
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetRs'
+        "404":
+          description: Не успешный ответ, питомец не найден
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorDto'
+                  - type: object
+                    properties:
+                      message:
+                        example: Pet not found by 25211cdd-7d18-4ae6-b693-d2e805246217
+
+  /rest/api/v1/pets/delete/{id}:
+    description: delete
+    delete:
+      summary: Удаление питомца по Id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор питомца
+          example: 25211cdd-7d18-4ae6-b693-d2e805246217
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Успешно удалено
+        "404":
+          description: Не успешный ответ, питомец не найден
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorDto'
+                  - type: object
+                    properties:
+                      message:
+                        example: Pet not found by 25211cdd-7d18-4ae6-b693-d2e805246217
+
+  /rest/api/v1/pets/delete:
+    description: delete
+    delete:
+      summary: Удаление питомцев по Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetsDeleteRq'
+      responses:
+        "207":
+          description: Удаление
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetsDeleteRs'
+
+components:
+  schemas:
+    PetRq:
+      type: object
+      required:
+        - name
+        - age
+      properties:
+        name:
+          type: string
+          description: Имя питомца
+          nullable: false
+          example: Tom
+        age:
+          type: integer
+          description: Возраст питомца
+          nullable: false
+          minimum: 1
+          example: 12
+
+    PetRs:
+      type: object
+      required:
+        - id
+        - name
+        - age
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name:
+          type: string
+          description: Имя питомца
+          example: Tom
+        age:
+          type: integer
+          description: Возраст питомца
+          example: 12
+        createdAt:
+          type: string
+          format: datetime
+          description: Время создания питомца
+          example: "2025-12-05T20:26:10.9680942"
+
+    PetsDeleteRq:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    PetsDeleteRs:
+      type: object
+      required:
+        - successDeleted
+        - failDeleted
+      properties:
+        successDeleted:
+          type: array
+          items:
+            type: string
+            format: uuid
+            description: Уникальный идентификатор питомца
+        failDeleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/PetsNotDeleted'
+
+    PetsNotDeleted:
+      type: object
+      required:
+        - petId
+        - failMessage
+      properties:
+        petId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор питомца
+        failMessage:
+          type: string
+          example: "Pet not found by 3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          description: Сообщение об ошибке
+
+    PetFindAllRq:
+      type: object
+      properties:
+        pageRq:
+          $ref: '#/components/schemas/PageRq'
+        filter:
+          type: array
+          items:
+            $ref: '#/components/schemas/PetFilterRq'
+          description: Фильтрация
+      description: Данные о пагинации
+
+    PetFilterRq:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: Ключ фильтра
+          example: name
+        value:
+          type: string
+          example: Tom
+          description: Значение фильтра
+
+    PetFindAllPaginRs:
+      allOf:
+        - $ref: '#/components/schemas/PageRs'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/PetRs'
+              description: Данные о питомцах
+      description: Спагинированные питомцы
+
+    PageRq:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+          minimum: 0
+          description: Номер страницы
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Размер данных на странице
+      description: Данные о пагинации
+
+    PageRs:
+      type: object
+      required:
+        - content
+        - pageNumber
+        - pageSize
+        - totalCount
+        - totalPages
+        - hasNext
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+          description: Данные
+        pageNumber:
+          type: integer
+          description: Номер страницы
+          example: 1
+        pageSize:
+          type: integer
+          description: Размер данных на странице
+          example: 12
+        totalCount:
+          type: integer
+          description: Общее кол-во данных
+          example: 175
+        totalPages:
+          type: integer
+          description: Общее кол-во страниц
+          example: 12
+        hasNext:
+          type: boolean
+          description: Последняя-ли страница
+          example: true
+      description: Данные с пагинацией
+
+    ErrorDto:
+      type: object
+      required:
+        - errorId
+        - message
+        - timestamp
+      properties:
+        errorId:
+          type: string
+          format: uuid
+          example: 25211cdd-7d18-4ae6-b693-d2e805246217
+          description: id ошибки
+        message:
+          type: string
+          example: Описание ошибки
+          description: Описание ошибки
+        timestamp:
+          type: string
+          format: datetime
+          description: Время возникновения ошибки
+          example: "2025-12-05T20:26:10.9680942"
+
+    ErrorFieldMessage:
+      type: object
+      properties:
+        errorMessage:
+          type: string
+          example: "должно быть не меньше 1"
+        fieldname:
+          type: string
+          example: "pageRq.pageSize"
+
+    ValidationErrorResponse:
+      type: object
+      required:
+        - errorDto
+        - errorFieldMessages
+      properties:
+        errorDto:
+          allOf:
+            - $ref: '#/components/schemas/ErrorDto'
+            - type: object
+              properties:
+                message:
+                  example: fail validation request data
+        errorFieldMessages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorFieldMessage'
