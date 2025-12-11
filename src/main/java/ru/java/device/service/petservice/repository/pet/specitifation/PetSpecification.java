@@ -24,38 +24,40 @@ public class PetSpecification implements Specification<Pet> {
 
     @Override
     public @Nullable Predicate toPredicate(Root<Pet> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        if (!Objects.isNull(rq) && !CollectionUtils.isEmpty(rq.getFilter())) {
-            List<Predicate> predicates = new ArrayList<>();
-
-            rq.getFilter().forEach(filter -> {
-                validationFilterKey(filter);
-
-                switch (filter.getKey().toLowerCase()) {
-                    case "name": {
-                        predicates.add(
-                                criteriaBuilder.like(
-                                        criteriaBuilder.lower(root.get(filter.getKey())),
-                                        "%" + filter.getValue().toLowerCase() + "%"
-                                )
-                        );
-                        break;
-                    }
-                    case "age": {
-                        predicates.add(
-                                criteriaBuilder.equal(
-                                        root.get("age"),
-                                        filter.getValue()
-                                )
-                        );
-                        break;
-                    }
-                }
-            });
-
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        if (Objects.isNull(rq) || CollectionUtils.isEmpty(rq.getFilter())) {
+            return null;
         }
 
-        return null;
+        List<Predicate> predicates = new ArrayList<>();
+
+        for (model.PetFilterRq filter : rq.getFilter()) {
+            validationFilterKey(filter);
+
+            switch (filter.getKey().toLowerCase()) {
+                //TODO вынести в entity
+                case "name": {
+                    predicates.add(
+                            criteriaBuilder.like(
+                                    criteriaBuilder.lower(root.get(filter.getKey())),
+                                    "%" + filter.getValue().toLowerCase() + "%"
+                            )
+                    );
+                    break;
+                }
+                //TODO вынести в entity
+                case "age": {
+                    predicates.add(
+                            criteriaBuilder.equal(
+                                    root.get("age"),
+                                    filter.getValue()
+                            )
+                    );
+                    break;
+                }
+            }
+        }
+
+        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 
     private void validationFilterKey(PetFilterRq filterRq) {
