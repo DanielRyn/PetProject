@@ -87,6 +87,7 @@ public class PetService {
                 .map(petConverter::map);
 
         log.info("foundAll {} pets", paginRs.getSize());
+
         return new PetFindAllPaginRs(
                 paginRs.getContent(),
                 paginRs.getNumber(),
@@ -99,17 +100,18 @@ public class PetService {
 
     public PetRs findById(@NonNull UUID petId) {
         Pet rs = petCasheService.get(petId);
-        if (Objects.isNull(rs)) {
-            rs = repository.findById(petId)
-                    .orElseThrow(() -> {
-                        log.info("pet not found by {}", petId);
-                        return new PetNotFoundException(petId);
-                    });
 
-            petCasheService.save(rs);
+        if (Objects.nonNull(rs)) {
+            log.info("found pet by {}", petId);
+            return petConverter.map(rs);
         }
 
-        log.info("found pet by {}", petId);
+        rs = repository.findById(petId).orElseThrow(() -> {
+            log.info("pet not found by {}", petId);
+            return new PetNotFoundException(petId);
+        });
+
+        petCasheService.save(rs);
         return petConverter.map(rs);
     }
 }
