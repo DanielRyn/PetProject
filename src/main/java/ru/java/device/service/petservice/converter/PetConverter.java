@@ -36,7 +36,7 @@ public class PetConverter {
         return new Pet(
                 pet.getName(),
                 pet.getAge(),
-                PetType.get(pet.getType().toLowerCase())
+                PetType.get(pet.getType())
         );
     }
 
