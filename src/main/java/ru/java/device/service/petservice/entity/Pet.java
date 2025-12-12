@@ -17,9 +17,10 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Pet {
 
-    public Pet(String name, int age) {
+    public Pet(String name, int age, PetType petType) {
         this.name = name;
         this.age = age;
+        this.petType = petType;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -35,4 +36,8 @@ public class Pet {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "type")
+    @Enumerated(value = EnumType.STRING)
+    private PetType petType;
 }

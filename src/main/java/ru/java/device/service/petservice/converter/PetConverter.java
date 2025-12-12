@@ -8,6 +8,7 @@ import ru.java.device.service.petservice.entity.Pet;
 import model.PetRs;
 import model.PetFindAllRq;
 import model.PetRq;
+import ru.java.device.service.petservice.entity.PetType;
 import ru.java.device.service.petservice.entity.cashe.PetCashe;
 
 import java.sql.Timestamp;
@@ -24,6 +25,7 @@ public class PetConverter {
                     pet.getId(),
                     pet.getName(),
                     pet.getAge(),
+                    pet.getPetType().toString(),
                     pet.getCreatedAt().toString()
             );
         }
@@ -31,7 +33,11 @@ public class PetConverter {
     }
 
     public Pet mapPetRqToPet(@NonNull PetRq pet) {
-        return new Pet(pet.getName(), pet.getAge());
+        return new Pet(
+                pet.getName(),
+                pet.getAge(),
+                PetType.get(pet.getType())
+        );
     }
 
     public PetCashe mapToCashe(Pet pet) {
@@ -41,7 +47,7 @@ public class PetConverter {
             rs.setId(pet.getId());
             rs.setName(pet.getName());
             rs.setAge(pet.getAge());
-
+            rs.setType(pet.getPetType());
 
             if (Objects.nonNull(pet.getCreatedAt())) {
                 rs.setCreatedAt(
@@ -59,7 +65,7 @@ public class PetConverter {
             rs.setId(pet.getId());
             rs.setName(pet.getName());
             rs.setAge(pet.getAge());
-
+            rs.setPetType(pet.getType());
 
             if (Objects.nonNull(pet.getCreatedAt())) {
                 rs.setCreatedAt(
