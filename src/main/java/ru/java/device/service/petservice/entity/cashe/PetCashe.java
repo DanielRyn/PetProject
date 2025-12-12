@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.stereotype.Service;
+import ru.java.device.service.petservice.entity.PetType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,4 +25,5 @@ public class PetCashe {
     private String name;
     private int age;
     private LocalDateTime createdAt;
+    private PetType type;
 }

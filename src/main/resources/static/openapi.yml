@@ -31,17 +31,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PetRs'
         400:
-          description: Операция по тому же Idempotemt Key
+          #TODO Проверить чтобы везде было также, лучше не описывать все ошибки, лучше описать такой формат
+          description: Ошибка пользователя
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDto'
-                  - type: object
-                    properties:
-                      message:
-                        type: string
-                        example: Operation by idempotemtKey {983f8edc-4f89-45bd-98e4-1023d13b042f} was process
+                $ref: '#/components/schemas/ErrorDto'
 
   /rest/api/v1/pets:
     post:
@@ -150,6 +145,7 @@ components:
       required:
         - name
         - age
+        - type
       properties:
         name:
           type: string
@@ -162,6 +158,11 @@ components:
           nullable: false
           minimum: 1
           example: 12
+        type:
+          type: string
+          description: Тип питомца
+          nullable: false
+          example: CAT
 
     PetRs:
       type: object
@@ -169,6 +170,7 @@ components:
         - id
         - name
         - age
+        - type
         - createdAt
       properties:
         id:
@@ -184,6 +186,10 @@ components:
           type: integer
           description: Возраст питомца
           example: 12
+        type:
+          type: string
+          description: Тип питомца
+          example: CAT
         createdAt:
           type: string
           format: datetime
