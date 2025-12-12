@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS pet
     name       VARCHAR(16) NOT NULL,
     age        INT         NOT NULL,
     created_at TIMESTAMP   NOT NULL DEFAULT now(),
-    type       varchar     not null
+    type       VARCHAR     NOT NULL
 );
