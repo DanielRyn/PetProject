@@ -69,6 +69,10 @@ task generateOpenApiAndBuild {
         dependsOn 'openApiGenerate'
     }
 
+    tasks.named('test') {
+        dependsOn 'openApiGenerate'
+    }
+
     dependsOn 'build'
 }
 
