@@ -21,7 +21,8 @@ public class Pet {
         this.name = name;
         this.age = age;
         this.petType = petType;
-        this.createdAt = LocalDateTime.now();
+        //todo возможно нужно вынести в date-util и покрыть тестом
+        this.createdAt = LocalDateTime.now().withNano(0);
     }
 
     @Id

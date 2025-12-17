@@ -10,6 +10,7 @@ spring:
   flyway:
     password: ${POSTGRES_PASSWORD:postgres}
     user: ${POSTGRES_USERNAME:postgres}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:postgres}
   jpa:
     show-sql: false
   data:
