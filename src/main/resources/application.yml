@@ -7,7 +7,6 @@ spring:
     name: ${POSTGRES_NAME:postgres}
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:postgres}
-
   flyway:
     password: ${POSTGRES_PASSWORD:postgres}
     user: ${POSTGRES_USERNAME:postgres}

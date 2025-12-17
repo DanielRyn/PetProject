@@ -22,7 +22,7 @@ public class PetController implements RestApi {
     private final PetService petService;
 
     @Override
-    public ResponseEntity<PetRs> restApiV1PetPost(UUID idempotentKey, PetRq petRq) {
+    public ResponseEntity<PetRs> create(UUID idempotentKey, PetRq petRq) {
         PetRs rs = petService.create(petRq, idempotentKey);
         return ResponseEntity.created(
                 URI.create(String.format("/rest/api/v1/pets/%s", rs.getId()))
@@ -30,25 +30,25 @@ public class PetController implements RestApi {
     }
 
     @Override
-    public ResponseEntity<PetsDeleteRs> restApiV1PetsDeleteDelete(PetsDeleteRq petsDeleteRq) {
+    public ResponseEntity<PetsDeleteRs> deleteByIds(PetsDeleteRq petsDeleteRq) {
         return ResponseEntity
                 .status(HttpStatus.MULTI_STATUS)
                 .body(petService.delete(petsDeleteRq));
     }
 
     @Override
-    public ResponseEntity<Void> restApiV1PetsDeleteIdDelete(UUID id) {
+    public ResponseEntity<Void> deleteById(UUID id) {
         petService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<PetFindAllPaginRs> restApiV1PetsPost(PetFindAllRq petFindAllRq) {
+    public ResponseEntity<PetFindAllPaginRs> findAll(PetFindAllRq petFindAllRq) {
         return ResponseEntity.ok(petService.findAll(petFindAllRq));
     }
 
     @Override
-    public ResponseEntity<PetRs> restApiV1PetsIdGet(UUID id) {
+    public ResponseEntity<PetRs> findById(UUID id) {
         return ResponseEntity.ok(petService.findById(id));
     }
 }

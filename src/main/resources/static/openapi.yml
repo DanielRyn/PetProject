@@ -2,11 +2,10 @@ openapi: 3.0.0
 info:
   title: Pet Service API
   version: 1.0.0
-servers:
-  - url: http://localhost:8080
 paths:
   /rest/api/v1/pet:
     post:
+      operationId: create
       summary: Создание питомца
       parameters:
         - name: idempotentKey
@@ -40,6 +39,7 @@ paths:
 
   /rest/api/v1/pets:
     post:
+      operationId: findAll
       summary: Получение всех питомцев
       requestBody:
         required: false
@@ -63,6 +63,7 @@ paths:
 
   /rest/api/v1/pets/{id}:
     get:
+      operationId: findById
       summary: Получение питомца по Id
       parameters:
         - name: id
@@ -93,8 +94,9 @@ paths:
                         example: Pet not found by 25211cdd-7d18-4ae6-b693-d2e805246217
 
   /rest/api/v1/pets/delete/{id}:
-    description: delete
+    description: Удаление питомца по Id
     delete:
+      operationId: deleteById
       summary: Удаление питомца по Id
       parameters:
         - name: id
@@ -121,8 +123,9 @@ paths:
                         example: Pet not found by 25211cdd-7d18-4ae6-b693-d2e805246217
 
   /rest/api/v1/pets/delete:
-    description: delete
+    description: Удаление питомцев по Id
     delete:
+      operationId: deleteByIds
       summary: Удаление питомцев по Id
       requestBody:
         required: true
