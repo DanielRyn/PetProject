@@ -65,7 +65,7 @@ class PetServiceTest {
         assertEquals(saved.getCreatedAt().toString(), created.getCreatedAt());
 
         verify(idempotentService, times(1)).isExist(idempotentKey);
-        verify(idempotentService, times(1)).isExist(any());
+        verify(idempotentService, times(2)).isExist(any());
 
         verify(converter, times(1)).mapPetRqToPet(rq);
         verify(converter, times(1)).map(saved);
