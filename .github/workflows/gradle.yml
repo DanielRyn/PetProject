@@ -32,8 +32,6 @@ jobs:
         run: ./gradlew clean generateOpenApiAndBuild --no-daemon
   build_docker_file:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       - uses: actions/checkout@v4
