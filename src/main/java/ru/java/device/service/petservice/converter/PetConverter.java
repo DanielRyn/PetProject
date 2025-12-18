@@ -10,8 +10,10 @@ import model.PetFindAllRq;
 import model.PetRq;
 import ru.java.device.service.petservice.entity.PetType;
 import ru.java.device.service.petservice.entity.cashe.PetCashe;
+import ru.java.device.service.petservice.util.TimeUtil;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -26,7 +28,7 @@ public class PetConverter {
                     pet.getName(),
                     pet.getAge(),
                     pet.getPetType().toString(),
-                    pet.getCreatedAt().toString()
+                    TimeUtil.formattedDate(pet.getCreatedAt())
             );
         }
         return rs;
@@ -68,9 +70,8 @@ public class PetConverter {
             rs.setPetType(pet.getType());
 
             if (Objects.nonNull(pet.getCreatedAt())) {
-                rs.setCreatedAt(
-                        Timestamp.valueOf(pet.getCreatedAt()).toLocalDateTime()
-                );
+                LocalDateTime localDateTime = Timestamp.valueOf(pet.getCreatedAt()).toLocalDateTime();
+                rs.setCreatedAt(localDateTime);
             }
         }
         return rs;
