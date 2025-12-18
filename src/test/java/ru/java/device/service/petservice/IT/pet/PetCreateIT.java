@@ -28,6 +28,7 @@ public class PetCreateIT extends IntegrationTest {
                 rq, model.PetFindAllPaginRs.class
         );
         assertEquals(HttpStatus.OK, found.getStatusCode());
+        assertNotNull(found.getBody());
         assertTrue(found.getBody().getContent().isEmpty());
         assertEquals(0, found.getBody().getTotalCount());
 
