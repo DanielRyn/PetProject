@@ -39,8 +39,9 @@ public class PetService {
 
         Pet petToSave = petConverter.mapPetRqToPet(rq);
         Pet saved = repository.save(petToSave);
-
         idempotentService.add(idempotentKey);
+
+        log.info("success pet saved {}", saved.getId());
         return petConverter.map(saved);
     }
 
