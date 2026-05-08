@@ -30,7 +30,10 @@ public enum PetType {
                 .findFirst()
                 .orElseThrow(() -> {
                     log.error("pet type {} is not valid", value);
-                    return new PetTypeNotValidException(value);
+                    return new PetTypeNotValidException(
+                            value,
+                            Arrays.toString(PetType.values())
+                    );
                 });
     }
 }

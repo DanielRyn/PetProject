@@ -53,7 +53,7 @@ class PetServiceTest {
         when(idempotentService.isExist(any())).thenReturn(false);
         when(converter.mapPetRqToPet(any())).thenReturn(saved);
         doNothing().when(idempotentService).add(any());
-        when(converter.map(any())).thenReturn(rs);
+        when(converter.mapPetToPetRs(any())).thenReturn(rs);
         when(repository.save(any())).thenReturn(saved);
 
         PetRs created = petService.create(rq, idempotentKey);
@@ -68,7 +68,7 @@ class PetServiceTest {
         verify(idempotentService, times(1)).isExist(any());
 
         verify(converter, times(1)).mapPetRqToPet(rq);
-        verify(converter, times(1)).map(saved);
+        verify(converter, times(1)).mapPetToPetRs(saved);
 
         verify(repository, times(1)).save(saved);
 

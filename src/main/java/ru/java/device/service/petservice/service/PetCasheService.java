@@ -26,11 +26,11 @@ public class PetCasheService {
         }
 
         log.info("found from cashe by key {}", petId);
-        return converter.mapCasheToPet(found.get());
+        return converter.mapPetCasheToPet(found.get());
     }
 
     public void save(@NonNull Pet value) {
-        repository.save(converter.mapToCashe(value));
+        repository.save(converter.mapPetToPetCashe(value));
         log.info("saved in cashe by key {}", value.getId());
     }
 
