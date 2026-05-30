@@ -19,11 +19,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PetCashe {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String name;
     private int age;
-    private LocalDateTime createdAt;
     private PetType type;
+    private LocalDateTime createdAt;
+    private LocalDateTime deletedAt;
+    private Boolean isDeleted;
 }

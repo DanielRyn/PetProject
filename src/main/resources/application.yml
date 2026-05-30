@@ -12,6 +12,9 @@ spring:
     user: ${POSTGRES_USERNAME:postgres}
   jpa:
     show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
   data:
     redis:
       username: ${REDIS_USERNAME:redis}

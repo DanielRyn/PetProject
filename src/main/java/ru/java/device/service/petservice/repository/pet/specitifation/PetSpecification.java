@@ -4,76 +4,80 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
+import ru.java.device.service.petservice.util.PetFindAllFilterUtil;
 import ru.java.device.service.petservice.entity.Pet;
-import model.PetFindAllRq;
-import model.PetFilterRq;
-import ru.java.device.service.petservice.exception.badRequest.FilterKeyNotContainsIsValidException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class PetSpecification implements Specification<Pet> {
-    private final PetFindAllRq rq;
+    private final model.PetFindAllRq rq;
 
     @Override
     public @Nullable Predicate toPredicate(Root<Pet> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         if (Objects.isNull(rq) || CollectionUtils.isEmpty(rq.getFilter())) {
-            return null;
+            return getFilterIsDeletedAsFalse(criteriaBuilder, root);
         }
 
         List<Predicate> predicates = new ArrayList<>();
+        PetFindAllFilterUtil.validationFilterKey(rq.getFilter());
 
-        for (model.PetFilterRq filter : rq.getFilter()) {
-            validationFilterKey(filter);
+        var filterRqs = rq.getFilter().stream().filter(Objects::nonNull).toList();
+        for (model.PetFilterRq filter : filterRqs) {
 
-            switch (filter.getKey().toLowerCase()) {
-                //TODO вынести в entity
-                case "name": {
-                    predicates.add(
-                            criteriaBuilder.like(
-                                    criteriaBuilder.lower(root.get(filter.getKey())),
-                                    "%" + filter.getValue().toLowerCase() + "%"
-                            )
-                    );
-                    break;
-                }
-                //TODO вынести в entity
-                case "age": {
-                    predicates.add(
-                            criteriaBuilder.equal(
-                                    root.get("age"),
-                                    filter.getValue()
-                            )
-                    );
-                    break;
-                }
+            if (SpecificationKey.NAME.toString().equals(filter.getKey().toUpperCase())) {
+                predicates.add(
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get(SpecificationKey.NAME.getEntityValue())),
+                                "%" + filter.getValue().toLowerCase() + "%"
+                        )
+                );
             }
+
+            if (SpecificationKey.AGE.toString().equals(filter.getKey().toUpperCase())) {
+                predicates.add(
+                        criteriaBuilder.equal(
+                                root.get(SpecificationKey.AGE.getEntityValue()),
+                                filter.getValue()
+                        )
+                );
+            }
+
+            if (SpecificationKey.TYPE.toString().equals(filter.getKey().toUpperCase())) {
+                predicates.add(
+                        criteriaBuilder.equal(
+                                root.get(SpecificationKey.TYPE.getEntityValue()),
+                                filter.getValue().toUpperCase()
+                        )
+                );
+            }
+
+            predicates.add(getFilterIsDeletedAsFalse(criteriaBuilder, root));
         }
 
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 
-    private void validationFilterKey(PetFilterRq filterRq) {
-        String key = filterRq.getKey();
-        if (Objects.isNull(key) ||
-                key.isBlank() ||
-                !Arrays.stream(SpecificationKey.values())
-                        .map(Enum::toString)
-                        .toList()
-                        .contains(filterRq.getKey().toUpperCase()))
+    private Predicate getFilterIsDeletedAsFalse(CriteriaBuilder criteriaBuilder, Root<Pet> root) {
+        return criteriaBuilder.equal(root.get(SpecificationKey.IS_DELETED.getEntityValue()), false);
+    }
 
-            throw new FilterKeyNotContainsIsValidException(
-                    filterRq.getKey(),
-                    Arrays.stream(SpecificationKey.values())
-                            .map(o -> o.toString().toLowerCase())
-                            .toList()
-            );
+    @AllArgsConstructor
+    @Getter
+    //TODO Подумать над тем чтобы сделать DenormolizeService и вынести эту логику туда
+    public enum SpecificationKey {
+        NAME("name"),
+        AGE("age"),
+        TYPE("petType"),
+        CREATED_AT("createdAt"),
+        IS_DELETED("isDeleted");
+
+        private final String entityValue;
     }
 }

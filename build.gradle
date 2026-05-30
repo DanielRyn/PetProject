@@ -1,3 +1,5 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '4.0.0'
@@ -45,6 +47,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
 
+    //todo вынести генерацию в отдельный сервис в следствии чего удалить эту зависимость
+    implementation("net.datafaker:datafaker:2.5.4")
+
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
@@ -62,29 +67,28 @@ task generateOpenApiAndBuild {
     group = 'build'
 
     tasks.named('compileJava') {
-        dependsOn 'openApiGenerate'
+        dependsOn 'openApiPetGenerate'
     }
 
     tasks.named('build') {
-        dependsOn 'openApiGenerate'
+        dependsOn 'openApiPetGenerate'
     }
 
     tasks.named('test') {
-        dependsOn 'openApiGenerate'
+        dependsOn 'openApiPetGenerate'
     }
 
     dependsOn 'build'
 }
 
-openApiGenerate {
-    generatorName.set('spring')
+tasks.register("openApiPetGenerate", GenerateTask) {
+    generatorName.set("spring")
 
     inputSpec.set("$projectDir/src/main/resources/static/openapi.yml")
     outputDir.set("$projectDir/generated")
 
-    invokerPackage.set('invoker')
-    modelPackage.set('model')
-    apiPackage.set('api')
+    apiPackage.set("api")
+    modelPackage.set("model")
 
     additionalProperties = [
             library              : "spring-cloud",

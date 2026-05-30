@@ -1,13 +1,8 @@
 package ru.java.device.service.petservice.converter;
 
 import lombok.NonNull;
-import model.PageRq;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.java.device.service.petservice.entity.Pet;
-import model.PetRs;
-import model.PetFindAllRq;
-import model.PetRq;
 import ru.java.device.service.petservice.entity.PetType;
 import ru.java.device.service.petservice.entity.cashe.PetCashe;
 
@@ -17,11 +12,11 @@ import java.util.Objects;
 @Service
 public class PetConverter {
 
-    public PetRs map(Pet pet) {
-        PetRs rs = new PetRs();
+    public model.PetRs mapPetToPetRs(Pet pet) {
+        model.PetRs rs = new model.PetRs();
 
         if (Objects.nonNull(pet)) {
-            return new PetRs(
+            return new model.PetRs(
                     pet.getId(),
                     pet.getName(),
                     pet.getAge(),
@@ -32,7 +27,7 @@ public class PetConverter {
         return rs;
     }
 
-    public Pet mapPetRqToPet(@NonNull PetRq pet) {
+    public Pet mapPetRqToPet(@NonNull model.PetRq pet) {
         return new Pet(
                 pet.getName(),
                 pet.getAge(),
@@ -40,7 +35,7 @@ public class PetConverter {
         );
     }
 
-    public PetCashe mapToCashe(Pet pet) {
+    public PetCashe mapPetToPetCashe(Pet pet) {
         PetCashe rs = new PetCashe();
 
         if (Objects.nonNull(pet)) {
@@ -48,17 +43,24 @@ public class PetConverter {
             rs.setName(pet.getName());
             rs.setAge(pet.getAge());
             rs.setType(pet.getPetType());
+            rs.setIsDeleted(pet.getIsDeleted());
 
             if (Objects.nonNull(pet.getCreatedAt())) {
                 rs.setCreatedAt(
                         Timestamp.valueOf(pet.getCreatedAt()).toLocalDateTime()
                 );
             }
+
+            if (Objects.nonNull(pet.getDeletedAt())) {
+                rs.setDeletedAt(
+                        Timestamp.valueOf(pet.getDeletedAt()).toLocalDateTime()
+                );
+            }
         }
         return rs;
     }
 
-    public Pet mapCasheToPet(PetCashe pet) {
+    public Pet mapPetCasheToPet(PetCashe pet) {
         Pet rs = new Pet();
 
         if (Objects.nonNull(pet)) {
@@ -66,25 +68,20 @@ public class PetConverter {
             rs.setName(pet.getName());
             rs.setAge(pet.getAge());
             rs.setPetType(pet.getType());
+            rs.setIsDeleted(pet.getIsDeleted());
 
             if (Objects.nonNull(pet.getCreatedAt())) {
                 rs.setCreatedAt(
                         Timestamp.valueOf(pet.getCreatedAt()).toLocalDateTime()
                 );
             }
+
+            if (Objects.nonNull(pet.getDeletedAt())) {
+                rs.setDeletedAt(
+                        Timestamp.valueOf(pet.getDeletedAt()).toLocalDateTime()
+                );
+            }
         }
         return rs;
-    }
-
-    public PageRequest getPetFindAllRqToPageRequest(PetFindAllRq rq) {
-        if (Objects.isNull(rq) || Objects.isNull(rq.getPageRq())) {
-            return PageRequest.of(0, 10);
-        }
-
-        PageRq pageRq = rq.getPageRq();
-        return PageRequest.of(
-                Objects.isNull(pageRq.getPageNumber()) || pageRq.getPageNumber() < 0 ? 0 : pageRq.getPageNumber(),
-                Objects.isNull(pageRq.getPageSize()) || pageRq.getPageSize() < 1 ? 10 : pageRq.getPageSize()
-        );
     }
 }

@@ -2,13 +2,18 @@ openapi: 3.0.0
 info:
   title: Pet Service API
   version: 1.0.0
+
 paths:
-  /rest/api/v1/pet:
+  /rest/api/v1/pet/create:
+    description: Создание питомца
+    summary: Создание питомца
     post:
-      operationId: create
+      description: Создание питомца
       summary: Создание питомца
+      operationId: petCreate
       parameters:
         - name: idempotentKey
+          description: Ключ идемпотентности
           in: header
           required: true
           example: 983f8edc-4f89-45bd-98e4-1023d13b042f
@@ -16,8 +21,8 @@ paths:
             type: string
             format: uuid
             description: Ключ идемпотентности
-
       requestBody:
+        description: Тело запроса для создание питомца
         content:
           application/json:
             schema:
@@ -37,9 +42,48 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorDto'
 
-  /rest/api/v1/pets:
+  /rest/api/v1/pet/create/some:
+    description: Создание нескольких питомцев
+    summary: Создание нескольких питомцев
     post:
-      operationId: findAll
+      operationId: petCreateSome
+      description: Создание нескольких питомцев
+      summary: Создание нескольких питомцев
+      parameters:
+        - name: idempotentKey
+          in: header
+          required: true
+          example: 983f8edc-4f89-45bd-98e4-1023d13b042f
+          schema:
+            type: string
+            format: uuid
+            description: Ключ идемпотентности
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createPetsRq'
+      responses:
+        201:
+          description: Успешный ответ на создание питомцев
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetsRs'
+        400:
+          #TODO Проверить чтобы везде было также, лучше не описывать все ошибки, лучше описать такой формат
+          description: Ошибка пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+
+  /rest/api/v1/pet/find/some:
+    description: Получение всех питомцев
+    summary: Получение всех питомцев
+    post:
+      operationId: petsFindSome
+      description: Получение всех питомцев
       summary: Получение всех питомцев
       requestBody:
         required: false
@@ -61,9 +105,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 
-  /rest/api/v1/pets/{id}:
+  /rest/api/v1/pet/find/{id}:
+    description: Получение питомца по Id
+    summary: Получение питомца по Id
     get:
-      operationId: findById
+      operationId: petsFindById
+      description: Получение питомца по Id
       summary: Получение питомца по Id
       parameters:
         - name: id
@@ -93,10 +140,27 @@ paths:
                       message:
                         example: Pet not found by 25211cdd-7d18-4ae6-b693-d2e805246217
 
-  /rest/api/v1/pets/delete/{id}:
+  /rest/api/v1/pet/types/find:
+    description: Получение всех типов питомцев
+    summary: Получение всех типов питомцев
+    get:
+      operationId: petsTypesFind
+      description: Получение всех типов питомцев
+      summary: Получение всех типов питомцев
+      responses:
+        "200":
+          description: Получение
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetTypesRs'
+
+  /rest/api/v1/pet/delete/{id}:
     description: Удаление питомца по Id
+    summary: Удаление питомца по Id
     delete:
-      operationId: deleteById
+      operationId: petsDeleteById
+      description: Удаление питомца по Id
       summary: Удаление питомца по Id
       parameters:
         - name: id
@@ -122,11 +186,13 @@ paths:
                       message:
                         example: Pet not found by 25211cdd-7d18-4ae6-b693-d2e805246217
 
-  /rest/api/v1/pets/delete:
-    description: Удаление питомцев по Id
+  /rest/api/v1/pet/delete/some:
+    description: Удаление нескольких питомцев по Id
+    summary: Удаление нескольких питомцев по Id
     delete:
-      operationId: deleteByIds
-      summary: Удаление питомцев по Id
+      operationId: petsDeleteByIdsSome
+      description: Удаление нескольких питомцев по Id
+      summary: Удаление нескольких питомцев по Id
       requestBody:
         required: true
         content:
@@ -143,6 +209,20 @@ paths:
 
 components:
   schemas:
+    createPetsRq:
+      type: object
+      required:
+        - petsRq
+      properties:
+        petsRq:
+          type: array
+          description: Питомцы
+          nullable: false
+          minItems: 1
+          maxItems: 101
+          items:
+            $ref: '#/components/schemas/PetRq'
+
     PetRq:
       type: object
       required:
@@ -199,6 +279,16 @@ components:
           description: Время создания питомца
           example: "2025-12-05T20:26:10.9680942"
 
+    PetsRs:
+      type: object
+      required:
+        - PetsRs
+      properties:
+        PetsRs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PetRs'
+
     PetsDeleteRq:
       type: object
       required:
@@ -251,7 +341,32 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PetFilterRq'
+          example: [
+            {
+              "key": "NAME",
+              "value": "Tom1"
+            },
+            {
+              "key": "AGE",
+              "value": 12
+            },
+            {
+              "key": "TYPE",
+              "value": "BIRD"
+            }
+          ]
           description: Фильтрация
+        sort:
+          type: array
+          items:
+            $ref: '#/components/schemas/PetSortRq'
+          example: [
+            {
+              "value": "CREATED_AT",
+              "type": "DESC"
+            }
+          ]
+          description: Сортировка
       description: Данные о пагинации
 
     PetFilterRq:
@@ -263,11 +378,29 @@ components:
         key:
           type: string
           description: Ключ фильтра
-          example: name
+          example: NAME
         value:
           type: string
           example: Tom
           description: Значение фильтра
+          nullable: false
+
+    PetSortRq:
+      type: object
+      required:
+        - value
+        - type
+      properties:
+        value:
+          type: string
+          example: NAME
+          enum: [ "NAME", "AGE", "TYPE","CREATED_AT" ]
+          description: Поле сортировки
+        type:
+          type: string
+          example: DESC
+          enum: [ "ASC", "DESC" ]
+          description: Тип сортировки
 
     PetFindAllPaginRs:
       allOf:
@@ -291,7 +424,7 @@ components:
         pageSize:
           type: integer
           minimum: 1
-          maximum: 100
+          maximum: 40
           description: Размер данных на странице
       description: Данные о пагинации
 
@@ -381,3 +514,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ErrorFieldMessage'
+
+    PetTypesRs:
+      type: object
+      required:
+        - types
+      properties:
+        types:
+          type: array
+          items:
+            type: string
+          description: Тип питомца
+          example: [ "DOG","CAT" ]
