@@ -1,5 +1,6 @@
 package ru.java.device.service.petservice.service;
 
+import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import ru.java.device.service.petservice.entity.Pet;
 import ru.java.device.service.petservice.repository.pet.PetRepository;
 import ru.java.device.service.petservice.repository.pet.specitifation.PetSpecification;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -32,7 +34,6 @@ public class PetService {
 
         Pet petToSave = petConverter.mapPetRqToPet(rq);
         Pet saved = repository.save(petToSave);
-
         idempotentService.add(idempotentKey);
 
         log.info("pet was save {}", saved.getId());
@@ -58,17 +59,19 @@ public class PetService {
         return new model.PetsRs(petRs);
     }
 
+    @Transactional
     public void delete(@NonNull UUID petId) {
-        if (!petRepository.existsById(petId)) {
+        if (!petRepository.existsPetByIsDeletedAndById(petId)) {
             log.info("pet not found by {}", petId);
             throw new PetNotFoundException(petId);
         }
 
-        repository.deleteById(petId);
+        repository.setDeletedStatusById(petId, LocalDateTime.now());
         petCasheService.delete(petId);
         log.info("pet by {} success deleted", petId);
     }
 
+    @Transactional
     public model.PetsDeleteRs delete(@NonNull model.PetsDeleteRq rq) {
         List<UUID> successDeleted = new ArrayList<>();
         List<model.PetsNotDeleted> failedDeleted = new ArrayList<>();

@@ -38,8 +38,10 @@ class PetServiceTest {
                 UUID.randomUUID(),
                 rq.getName(),
                 rq.getAge(),
+                PetType.BIRD,
                 LocalDateTime.now(),
-                PetType.BIRD
+                LocalDateTime.now(),
+                false
         );
         PetRs rs = new PetRs(
                 saved.getId(),

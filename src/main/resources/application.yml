@@ -11,7 +11,10 @@ spring:
     password: ${POSTGRES_PASSWORD:postgres}
     user: ${POSTGRES_USERNAME:postgres}
   jpa:
-    show-sql: true
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
   data:
     redis:
       username: ${REDIS_USERNAME:redis}

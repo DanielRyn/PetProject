@@ -12,17 +12,19 @@ import java.util.Arrays;
 @Slf4j
 public enum PetType {
 
-    CAT,
-    BIRD,
-    FISH,
-    REPTILE,
-    AMPHIBIAN,
-    INSECT,
-    ARACHNID,
-    CRUSTACEAN,
-    MOLLUSK,
-    ECHINODERM,
-    DOG;
+    CAT("Кошка"),
+    BIRD("Птица"),
+    FISH("Рыба"),
+    REPTILE("Рептилия"),
+    AMPHIBIAN("Амфибия"),
+    INSECT("Насекомое"),
+    ARACHNID("Паукообразное"),
+    CRUSTACEAN("Ракообразное"),
+    MOLLUSK("Моллюск"),
+    ECHINODERM("Иглокожее"),
+    DOG("Собака");
+
+    private final String valueAsString;
 
     public static PetType get(String value) {
         return Arrays.stream(PetType.values())

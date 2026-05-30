@@ -43,10 +43,17 @@ public class PetConverter {
             rs.setName(pet.getName());
             rs.setAge(pet.getAge());
             rs.setType(pet.getPetType());
+            rs.setIsDeleted(pet.getIsDeleted());
 
             if (Objects.nonNull(pet.getCreatedAt())) {
                 rs.setCreatedAt(
                         Timestamp.valueOf(pet.getCreatedAt()).toLocalDateTime()
+                );
+            }
+
+            if (Objects.nonNull(pet.getDeletedAt())) {
+                rs.setDeletedAt(
+                        Timestamp.valueOf(pet.getDeletedAt()).toLocalDateTime()
                 );
             }
         }
@@ -61,10 +68,17 @@ public class PetConverter {
             rs.setName(pet.getName());
             rs.setAge(pet.getAge());
             rs.setPetType(pet.getType());
+            rs.setIsDeleted(pet.getIsDeleted());
 
             if (Objects.nonNull(pet.getCreatedAt())) {
                 rs.setCreatedAt(
                         Timestamp.valueOf(pet.getCreatedAt()).toLocalDateTime()
+                );
+            }
+
+            if (Objects.nonNull(pet.getDeletedAt())) {
+                rs.setDeletedAt(
+                        Timestamp.valueOf(pet.getDeletedAt()).toLocalDateTime()
                 );
             }
         }

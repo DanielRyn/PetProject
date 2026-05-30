@@ -66,7 +66,7 @@ public class PetFindAllFilterUtil {
                 }
 
                 int age = Integer.parseInt(o.getValue());
-                if (age < 0) {
+                if (age <= 0) {
                     throw new PetFindSomeFilterRqValidException(
                             String.format("\"%s\" должно быть больше нуля", o.getValue())
                     );
@@ -97,6 +97,7 @@ public class PetFindAllFilterUtil {
         ).withSort(sort);
     }
 
+    //TODO Проверить чтобы поля сортировки всегда были разные
     private static Sort getSort(model.PetFindAllRq rq) {
         if (Objects.nonNull(rq) && Objects.nonNull(rq.getSort()) && !rq.getSort().isEmpty()) {
             List<Sort.Order> orders = rq.getSort().stream()

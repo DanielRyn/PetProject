@@ -22,7 +22,7 @@ public class PetSpecification implements Specification<Pet> {
     @Override
     public @Nullable Predicate toPredicate(Root<Pet> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         if (Objects.isNull(rq) || CollectionUtils.isEmpty(rq.getFilter())) {
-            return null;
+            return getFilterIsDeletedAsFalse(criteriaBuilder, root);
         }
 
         List<Predicate> predicates = new ArrayList<>();
@@ -57,9 +57,15 @@ public class PetSpecification implements Specification<Pet> {
                         )
                 );
             }
+
+            predicates.add(getFilterIsDeletedAsFalse(criteriaBuilder, root));
         }
 
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+    }
+
+    private Predicate getFilterIsDeletedAsFalse(CriteriaBuilder criteriaBuilder, Root<Pet> root) {
+        return criteriaBuilder.equal(root.get(SpecificationKey.IS_DELETED.getEntityValue()), false);
     }
 
     @AllArgsConstructor
@@ -69,7 +75,8 @@ public class PetSpecification implements Specification<Pet> {
         NAME("name"),
         AGE("age"),
         TYPE("petType"),
-        CREATED_AT("createdAt");
+        CREATED_AT("createdAt"),
+        IS_DELETED("isDeleted");
 
         private final String entityValue;
     }
