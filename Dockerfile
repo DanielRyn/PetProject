@@ -1,4 +1,3 @@
-# --- Stage 1: Build ---
 FROM gradle:9.1.0-jdk17 AS builder
 WORKDIR /app
 

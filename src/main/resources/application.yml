@@ -4,7 +4,7 @@ spring:
   datasource:
     password: ${POSTGRES_PASSWORD:postgres}
     username: ${POSTGRES_USERNAME:postgres}
-    name: ${POSTGRES_NAME:postgres}
+    name: ${POSTGRES_DB:postgres}
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:postgres}
   flyway:
@@ -21,7 +21,21 @@ spring:
       password: ${REDIS_PASSWORD:redis}
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:9990}/realms/${KEYCLOAK_REALM:master}/protocol/openid-connect/certs
+logging:
+  level:
+    root: INFO
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    org.springframework.security.oauth2: INFO
+    org.springframework.security.jwt: INFO
 springdoc:
   swagger-ui:
-    path: /
-    url: /openapi.yml
+    path: /swagger-ui.html
+    url: /static/openapi.yml
+server:
+  port: ${SERVER_PORT:8080}
