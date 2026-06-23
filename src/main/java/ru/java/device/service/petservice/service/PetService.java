@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ru.java.device.service.petservice.util.PetFindAllFilterUtil;
@@ -27,7 +28,7 @@ public class PetService {
     private final IdempotentService idempotentService;
     private final PetRepository petRepository;
 
-    public model.PetRs create(@NonNull model.PetRq rq, @NonNull UUID idempotentKey) {
+    public PetRs create(@NonNull PetRq rq, @NonNull UUID idempotentKey) {
         if (idempotentService.isExist(idempotentKey)) {
             throw new OperationByIdempotemtKeyWasSuccessException(idempotentKey);
         }
@@ -40,13 +41,13 @@ public class PetService {
         return petConverter.mapPetToPetRs(saved);
     }
 
-    public model.PetsRs create(@NonNull model.CreatePetsRq rq, @NonNull UUID idempotentKey) {
+    public PetsRs create(@NonNull CreatePetsRq rq, @NonNull UUID idempotentKey) {
         if (idempotentService.isExist(idempotentKey)) {
             throw new OperationByIdempotemtKeyWasSuccessException(idempotentKey);
         }
 
-        List<model.PetRs> petRs = new ArrayList<>();
-        for (model.PetRq petRq : rq.getPetsRq()) {
+        List<PetRs> petRs = new ArrayList<>();
+        for (PetRq petRq : rq.getPetsRq()) {
 
             Pet petToSave = petConverter.mapPetRqToPet(petRq);
             Pet saved = repository.save(petToSave);
@@ -56,7 +57,7 @@ public class PetService {
         idempotentService.add(idempotentKey);
 
         log.info("was save {} pets", petRs.size());
-        return new model.PetsRs(petRs);
+        return new PetsRs(petRs);
     }
 
     @Transactional
@@ -72,9 +73,9 @@ public class PetService {
     }
 
     @Transactional
-    public model.PetsDeleteRs delete(@NonNull model.PetsDeleteRq rq) {
+    public PetsDeleteRs delete(@NonNull PetsDeleteRq rq) {
         List<UUID> successDeleted = new ArrayList<>();
-        List<model.PetsNotDeleted> failedDeleted = new ArrayList<>();
+        List<PetsNotDeleted> failedDeleted = new ArrayList<>();
 
         List<UUID> distinctPetIds = rq.getId().stream().distinct().toList();
         for (UUID petId : distinctPetIds) {
@@ -82,28 +83,29 @@ public class PetService {
                 delete(petId);
                 successDeleted.add(petId);
             } catch (Exception e) {
-                failedDeleted.add(new model.PetsNotDeleted(
+                failedDeleted.add(new PetsNotDeleted(
                         petId,
                         e.getMessage()
                 ));
             }
         }
 
-        return new model.PetsDeleteRs(
+        return new PetsDeleteRs(
                 successDeleted,
                 failedDeleted
         );
     }
 
-    public model.PetFindAllPaginRs findAll(model.PetFindAllRq rq) {
-        Page<model.PetRs> petFoundAllPaginRs = repository
+    public PetFindAllPaginRs findAll(PetFindAllRq rq) {
+        Page<PetRs> petFoundAllPaginRs = repository
                 .findAll(
                         new PetSpecification(rq),
                         PetFindAllFilterUtil.getPetFindAllRqToPageRequest(rq)
                 ).map(petConverter::mapPetToPetRs);
 
-        log.info("foundAll {} pets", petFoundAllPaginRs.getSize());
-        return new model.PetFindAllPaginRs(
+        //TODO Разобраться с логами
+        log.info("foundAll {} pets, rq={}", petFoundAllPaginRs.getSize(), rq);
+        return new PetFindAllPaginRs(
                 petFoundAllPaginRs.getContent(),
                 petFoundAllPaginRs.getNumber(),
                 petFoundAllPaginRs.getSize(),
@@ -113,11 +115,10 @@ public class PetService {
         );
     }
 
-    public model.PetRs findById(@NonNull UUID petId) {
+    public PetRs findById(@NonNull UUID petId) {
         Pet rs = petCasheService.get(petId);
 
         if (Objects.nonNull(rs)) {
-            log.info("found pet by {}", petId);
             return petConverter.mapPetToPetRs(rs);
         }
 
@@ -126,6 +127,7 @@ public class PetService {
             return new PetNotFoundException(petId);
         });
 
+        log.info("found pet by {}", petId);
         petCasheService.save(rs);
         return petConverter.mapPetToPetRs(rs);
     }

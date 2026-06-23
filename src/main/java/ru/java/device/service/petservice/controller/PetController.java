@@ -2,6 +2,7 @@ package ru.java.device.service.petservice.controller;
 
 import api.RestApi;
 import lombok.RequiredArgsConstructor;
+import model.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,30 +19,30 @@ public class PetController implements RestApi {
     private final PetTypeService petTypeService;
 
     @Override
-    public ResponseEntity<model.PetRs> petCreate(UUID idempotentKey, model.PetRq petRq) {
-        model.PetRs rs = petService.create(petRq, idempotentKey);
+    public ResponseEntity<PetRs> petCreate(UUID idempotentKey, PetRq petRq) {
+        PetRs rs = petService.create(petRq, idempotentKey);
         return ResponseEntity.created(
                 URI.create(String.format("/rest/api/v1/pets/%s", rs.getId()))
         ).body(rs);
     }
 
     @Override
-    public ResponseEntity<model.PetsRs> petCreateSome(UUID idempotentKey, model.CreatePetsRq createPetsRq) {
+    public ResponseEntity<PetsRs> petCreateSome(UUID idempotentKey, CreatePetsRq createPetsRq) {
         return ResponseEntity.ok(petService.create(createPetsRq, idempotentKey));
     }
 
     @Override
-    public ResponseEntity<model.PetFindAllPaginRs> petsFindSome(model.PetFindAllRq petFindAllRq) {
+    public ResponseEntity<PetFindAllPaginRs> petsFindSome(PetFindAllRq petFindAllRq) {
         return ResponseEntity.ok(petService.findAll(petFindAllRq));
     }
 
     @Override
-    public ResponseEntity<model.PetRs> petsFindById(UUID id) {
+    public ResponseEntity<PetRs> petsFindById(UUID id) {
         return ResponseEntity.ok(petService.findById(id));
     }
 
     @Override
-    public ResponseEntity<model.PetTypesRs> petsTypesFind() {
+    public ResponseEntity<PetTypesRs> petsTypesFind() {
         return ResponseEntity.ok(petTypeService.findTypes());
     }
 
@@ -52,7 +53,7 @@ public class PetController implements RestApi {
     }
 
     @Override
-    public ResponseEntity<model.PetsDeleteRs> petsDeleteByIdsSome(model.PetsDeleteRq petsDeleteRq) {
+    public ResponseEntity<PetsDeleteRs> petsDeleteByIdsSome(PetsDeleteRq petsDeleteRq) {
         return ResponseEntity
                 .status(HttpStatus.MULTI_STATUS)
                 .body(petService.delete(petsDeleteRq));

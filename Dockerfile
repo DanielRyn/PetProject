@@ -4,7 +4,6 @@ WORKDIR /app
 COPY --chown=gradle:gradle . .
 RUN gradle clean generateOpenApiAndBuild --no-daemon
 
-
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
