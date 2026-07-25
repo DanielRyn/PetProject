@@ -1,6 +1,8 @@
 package ru.java.device.service.petservice.converter;
 
 import lombok.NonNull;
+import model.PetRq;
+import model.PetRs;
 import org.springframework.stereotype.Service;
 import ru.java.device.service.petservice.entity.Pet;
 import ru.java.device.service.petservice.entity.PetType;
@@ -11,8 +13,7 @@ import java.util.Objects;
 
 @Service
 public class PetConverter {
-
-    public model.PetRs mapPetToPetRs(Pet pet) {
+    public PetRs mapPetToPetRs(Pet pet) {
         model.PetRs rs = new model.PetRs();
 
         if (Objects.nonNull(pet)) {
@@ -27,7 +28,7 @@ public class PetConverter {
         return rs;
     }
 
-    public Pet mapPetRqToPet(@NonNull model.PetRq pet) {
+    public Pet mapPetRqToPet(@NonNull PetRq pet) {
         return new Pet(
                 pet.getName(),
                 pet.getAge(),

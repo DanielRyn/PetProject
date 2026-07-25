@@ -1,5 +1,6 @@
 package ru.java.device.service.petservice.service;
 
+import io.micrometer.observation.annotation.Observed;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Observed
 public class IdempotentService {
     private final idempotentRepository repository;
 

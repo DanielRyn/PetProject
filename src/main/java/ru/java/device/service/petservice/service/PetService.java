@@ -1,5 +1,6 @@
 package ru.java.device.service.petservice.service;
 
+import io.micrometer.observation.annotation.Observed;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,8 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Observed
 public class PetService {
-    private final PetRepository repository;
     private final PetConverter petConverter;
     private final PetCasheService petCasheService;
     private final IdempotentService idempotentService;
@@ -34,7 +35,7 @@ public class PetService {
         }
 
         Pet petToSave = petConverter.mapPetRqToPet(rq);
-        Pet saved = repository.save(petToSave);
+        Pet saved = petRepository.save(petToSave);
         idempotentService.add(idempotentKey);
 
         log.info("pet was save {}", saved.getId());
@@ -50,7 +51,7 @@ public class PetService {
         for (PetRq petRq : rq.getPetsRq()) {
 
             Pet petToSave = petConverter.mapPetRqToPet(petRq);
-            Pet saved = repository.save(petToSave);
+            Pet saved = petRepository.save(petToSave);
             petRs.add(petConverter.mapPetToPetRs(saved));
         }
 
@@ -67,7 +68,8 @@ public class PetService {
             throw new PetNotFoundException(petId);
         }
 
-        repository.setDeletedStatusById(petId, LocalDateTime.now());
+        //TODO LocalDateTime.now() --> Нужно по определённой таймзоне брать текущ. дату
+        petRepository.setDeletedStatusById(petId, LocalDateTime.now());
         petCasheService.delete(petId);
         log.info("pet by {} success deleted", petId);
     }
@@ -97,7 +99,7 @@ public class PetService {
     }
 
     public PetFindAllPaginRs findAll(PetFindAllRq rq) {
-        Page<PetRs> petFoundAllPaginRs = repository
+        Page<PetRs> petFoundAllPaginRs = petRepository
                 .findAll(
                         new PetSpecification(rq),
                         PetFindAllFilterUtil.getPetFindAllRqToPageRequest(rq)
@@ -122,7 +124,7 @@ public class PetService {
             return petConverter.mapPetToPetRs(rs);
         }
 
-        rs = repository.findById(petId).orElseThrow(() -> {
+        rs = petRepository.findById(petId).orElseThrow(() -> {
             log.info("pet not found by {}", petId);
             return new PetNotFoundException(petId);
         });

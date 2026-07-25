@@ -1,5 +1,6 @@
 package ru.java.device.service.petservice.service;
 
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Observed
 public class PetTypeService {
 
     public model.PetTypesRs findTypes() {

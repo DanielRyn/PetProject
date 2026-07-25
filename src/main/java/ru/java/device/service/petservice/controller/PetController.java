@@ -1,6 +1,7 @@
 package ru.java.device.service.petservice.controller;
 
 import api.RestApi;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import model.*;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
+@Observed
 public class PetController implements RestApi {
     private final PetService petService;
     private final PetTypeService petTypeService;

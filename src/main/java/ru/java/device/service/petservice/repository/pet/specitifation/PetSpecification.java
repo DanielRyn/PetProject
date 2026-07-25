@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import model.PetFindAllRq;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
@@ -17,7 +18,7 @@ import java.util.*;
 
 @RequiredArgsConstructor
 public class PetSpecification implements Specification<Pet> {
-    private final model.PetFindAllRq rq;
+    private final PetFindAllRq rq;
 
     @Override
     public @Nullable Predicate toPredicate(Root<Pet> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {

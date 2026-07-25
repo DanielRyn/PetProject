@@ -1,7 +1,9 @@
 package ru.java.device.service.petservice.util;
 
 import lombok.NonNull;
+import model.PageRq;
 import model.PetFilterRq;
+import model.PetFindAllRq;
 import ru.java.device.service.petservice.entity.PetType;
 import ru.java.device.service.petservice.exception.badRequest.ApplicationBadRequestException;
 import ru.java.device.service.petservice.exception.badRequest.PetFindSomeFilterRqValidException;
@@ -19,7 +21,7 @@ import java.util.Objects;
 
 public class PetFindAllFilterUtil {
 
-    public static void validationFilterKey(@NonNull List<model.PetFilterRq> filterRq){
+    public static void validationFilterKey(@NonNull List<PetFilterRq> filterRq){
         //Проверка чтобы key не повторялся больше одного раза
         //Группируем по key и ищем группу где больше 1 элемента, если находим - кидаем исключение
         Optional<PetFilterRq> found = filterRq.stream()
@@ -28,6 +30,7 @@ public class PetFindAllFilterUtil {
                 .filter(o -> o.size() > 1)
                 .map(o -> o.get(0))
                 .findFirst();
+
         if (found.isPresent()) {
             throw new ApplicationBadRequestException(
                     String.format(
@@ -39,7 +42,7 @@ public class PetFindAllFilterUtil {
 
         filterRq.forEach(o -> {
 
-            //Проверка что key валидно и соответствует SpecificationKey
+            //Проверка что key валиден и соответствует SpecificationKey
             if (!Arrays.stream(SpecificationKey.values())
                     .map(Enum::toString)
                     .toList()
@@ -81,7 +84,7 @@ public class PetFindAllFilterUtil {
         });
     }
 
-    public static PageRequest getPetFindAllRqToPageRequest(model.PetFindAllRq rq) {
+    public static PageRequest getPetFindAllRqToPageRequest(PetFindAllRq rq) {
         Sort sort = getSort(rq);
         if (Objects.isNull(rq) || Objects.isNull(rq.getPageRq())) {
             return PageRequest.of(
@@ -90,17 +93,18 @@ public class PetFindAllFilterUtil {
             );
         }
 
-        model.PageRq pageRq = rq.getPageRq();
+        PageRq pageRq = rq.getPageRq();
         return PageRequest.of(
                 Objects.isNull(pageRq.getPageNumber()) || pageRq.getPageNumber() < 0 ? 0 : pageRq.getPageNumber(),
                 Objects.isNull(pageRq.getPageSize()) || pageRq.getPageSize() < 1 ? 10 : pageRq.getPageSize()
         ).withSort(sort);
     }
 
-    //TODO Проверить чтобы поля сортировки всегда были разные
-    private static Sort getSort(model.PetFindAllRq rq) {
+    private static Sort getSort(PetFindAllRq rq) {
         if (Objects.nonNull(rq) && Objects.nonNull(rq.getSort()) && !rq.getSort().isEmpty()) {
             List<Sort.Order> orders = rq.getSort().stream()
+
+                    //TODO Проверить чтобы поля сортировки (o.getValue()) всегда были разные.
                     .map(o -> {
                         String direction = o.getType().toString();
                         String value = SpecificationKey.valueOf(o.getValue().toString()).getEntityValue();

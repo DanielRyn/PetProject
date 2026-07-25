@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import ru.java.device.service.petservice.model.JwtUserDto;
 
@@ -12,25 +13,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Component
 public class JwtParseUtil {
+    public static String KEYCKLOAK_ACCOUNT_NAME;
 
     @Value(value = "${spring.security.keycloak.account}")
-    private static String KEYCLOAK_ACCOUNT;
-
-    //TODO Это для аудита событий, потом будет использовать
-
-    /**
-     *
-     * @return Текущий авторизованный пользователь
-     */
-    public static JwtUserDto getUser() {
-        var claims = getClaims(((Jwt) SecurityContextHolder.getContext().getAuthentication().getCredentials()));
-        return JwtUserDto.builder()
-                .userId(claims.get("sub"))
-                .userName(claims.get("preferred_username"))
-                .userRoles(getUserRoles(claims))
-                .clientName(claims.get("azp"))
-                .build();
+    public void setKeycloakAccount(String keycloakAccountName) {
+        KEYCKLOAK_ACCOUNT_NAME = keycloakAccountName;
     }
 
     public static Map<String, Object> getClaims(Jwt jwt) {
@@ -41,7 +30,7 @@ public class JwtParseUtil {
         try {
             return ((Map<String, Map<String, List<Object>>>) claims
                     .get("resource_access"))
-                    .get(KEYCLOAK_ACCOUNT)
+                    .get(KEYCKLOAK_ACCOUNT_NAME)
                     .get("roles");
         } catch (Exception e) {
             log.error("error parse jwt token", e);
@@ -50,7 +39,6 @@ public class JwtParseUtil {
     }
 
     public static Collection<SimpleGrantedAuthority> extractAuthorities(Jwt jwt) {
-
         Map<String, Object> claims = JwtParseUtil.getClaims(jwt);
         List<Object> roles = JwtParseUtil.getUserRoles(claims);
 
@@ -61,5 +49,15 @@ public class JwtParseUtil {
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                 .collect(Collectors.toList());
+    }
+
+    public static JwtUserDto getUser() {
+        var claims = getClaims(((Jwt) SecurityContextHolder.getContext().getAuthentication().getCredentials()));
+        return JwtUserDto.builder()
+                .userId(claims.get("sub"))
+                .userName(claims.get("preferred_username"))
+                .userRoles(getUserRoles(claims))
+                .clientName(claims.get("azp"))
+                .build();
     }
 }
