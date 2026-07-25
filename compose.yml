@@ -43,7 +43,7 @@ services:
       - "80:80"
     volumes:
       - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./infrastructure/nginx/static:/var/www/html/site
+#      - ./infrastructure/nginx/static:/var/www/html/site
     depends_on:
       - pet-service
 
