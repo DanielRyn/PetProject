@@ -35,7 +35,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/PetRs'
         400:
-          #TODO Проверить чтобы везде было также, лучше не описывать все ошибки, лучше описать такой формат
           description: Ошибка пользователя
           content:
             application/json:
@@ -71,7 +70,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/PetsRs'
         400:
-          #TODO Проверить чтобы везде было также, лучше не описывать все ошибки, лучше описать такой формат
           description: Ошибка пользователя
           content:
             application/json:

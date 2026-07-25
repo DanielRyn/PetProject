@@ -1,6 +1,6 @@
 spring:
   application:
-    name: pet-api
+    name: pet-service
   datasource:
     password: ${POSTGRES_PASSWORD:postgres}
     username: ${POSTGRES_USERNAME:postgres}
@@ -23,10 +23,8 @@ spring:
       port: ${REDIS_PORT:6379}
   security:
     keycloak:
-      account:
-        ${KEYCLOAK_ACCOUNT:pet-service-account}
-      realm:
-        ${KEYCLOAK_REALM:pet-service-realm}
+      account: ${KEYCLOAK_ACCOUNT:account}
+      realm: ${KEYCLOAK_REALM:master}
     oauth2:
       resourceserver:
         jwt:
@@ -37,3 +35,37 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     url: openapi.yml
+management:
+  metrics:
+    export:
+      otlp:
+        enabled: false
+  observations:
+    annotations:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+    export:
+      enabled: true
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${TEMPO_URL:http://localhost:4318/v1/traces}
+        schedule-delay: 1s
+    resource-attributes:
+      service.name: ${spring.application.name:pet-service}
+      service.version: ${project.version:1.0.2}
+  otlp:
+    metrics:
+      export:
+        enabled: false
+
+  #открытие порта для /actuator/**
+  server:
+    port: 9091

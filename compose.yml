@@ -1,30 +1,111 @@
-version: '3.9'
+version: '3.8'
 
 services:
   pet-service:
     container_name: pet-service
     build: .
     environment:
-      POSTGRES_HOST: postgres
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SERVER_PORT: 8083
+
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: 5432
       REDIS_HOST: redis
+
+      KEYCLOAK_HOST: keycloak
+      KEYCLOAK_PORT: 8080
+      KEYCLOAK_REALM: master
+      KEYCLOAK_ACCOUNT: account
+
+      TEMPO_URL: http://tempo:4318/v1/traces
     depends_on:
       postgres:
         condition: service_started
       redis:
         condition: service_started
+      nexus:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    expose:
+      - "8083"
+      - "9091"
+    healthcheck:
+      test: "curl --fail --silent localhost:8083/actuator/health | grep UP || exit 1"
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
     ports:
-      - "8081:8080"
+      - "80:80"
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infrastructure/nginx/static:/var/www/html/site
+    depends_on:
+      - pet-service
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.2
+    container_name: keycloak
+    ports:
+      - "9990:8080"
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+
+      KC_DB: postgres
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_DB_SCHEMA: public
+      KC_DB_USERNAME: ${POSTGRES_USERNAME}
+      KC_DB_URL_HOST: postgres-keycloak
+      KC_DB_URL: jdbc:postgresql://postgres-keycloak:5431/${POSTGRES_DB}
+      KC_DB_URL_DATABASE: ${POSTGRES_DB}
+      KC_LOG_LEVEL: INFO
+    depends_on:
+      postgres-keycloak:
+        condition: service_started
+    command: start-dev
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: on-failure
+
   postgres:
     image: postgres:latest
     container_name: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${KEPOSTGRES_DB}
     volumes:
       - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USERNAME}"]
+    ports:
+      - "5432:5432"
+
+  postgres-keycloak:
+    image: postgres:latest
+    container_name: postgres-keycloak
+    environment:
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${KEPOSTGRES_DB}
+      PGPORT: 5431
+    volumes:
+      - postgres-keycloak-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USERNAME}"]
+    ports:
+      - "5431:5431"
+
   redis:
     image: redis:8.4.0-alpine
     container_name: redis
@@ -34,6 +115,86 @@ services:
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
       - "6379:6379"
+
+  nexus:
+    image: sonatype/nexus3
+    container_name: nexus
+    volumes:
+      - ./docker-data/nexus/admin.password:/nexus-data/admin.password
+      - nexus-data:/nexus-data
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/service/rest/v1/status"]
+
+  grafana:
+    image: grafana/grafana:12.2
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infrastructure/observability/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+
+  prometheus:
+    image: prom/prometheus:v3.12.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    command: --config.file=/etc/prometheus/datasource.yml
+    volumes:
+      - ./infrastructure/observability/prometheus/prometheus.yml:/etc/prometheus/datasource.yml
+      - prometheus-data:/prometheus
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yaml
+    user: "root"
+    volumes:
+      - ./infrastructure/observability/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    user: root
+    ports:
+      - "9080:9080"  # HTTP-интерфейс Alloy (по умолчанию)
+      - "4319:4319"   # OTLP HTTP (если нужен)
+    volumes:
+      - ./infrastructure/observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/log:/var/log:ro
+    environment:
+      GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push  # локальный Loki
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:9080
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    volumes:
+      - ./infrastructure/observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"   # Tempo UI / HTTP
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP (Spring Boot hits this)
+
 volumes:
   postgres-data:
   redis-data:
+  nexus-data:
+  keycloak-data:
+  postgres-keycloak-data:
+  grafana-data:
+  prometheus-data:
+  tempo_data:

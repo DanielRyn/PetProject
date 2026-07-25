@@ -32,12 +32,19 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:5.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-aop:3.5.16'
 
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.6'
     implementation 'jakarta.validation:jakarta.validation-api:3.1.1'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.3'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0'
+
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
+    implementation 'io.micrometer:micrometer-registry-otlp'
+    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-jdbc:2.29.0-alpha'
 
     compileOnly 'org.projectlombok:lombok'
     implementation 'org.flywaydb:flyway-database-postgresql'
